@@ -1,0 +1,75 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath('org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE')
+// tag::build[]
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+// end::build[]
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+// tag::plugin[]
+apply plugin: 'docker'
+// end::plugin[]
+
+// This is used as the docker image prefix (org)
+//group = 'gregturn'
+
+jar{
+    baseName = 'spring-boot-docker'
+    version =  '0.1.0'
+}
+
+// tag::task[]
+task buildDocker(type: Docker, dependsOn: build) {
+  push = true
+  applicationName = jar.baseName
+  dockerfile = file('src/main/docker/Dockerfile')
+  doFirst {
+    copy {
+      from jar
+      into stageDir
+    }
+  }
+    
+}
+// end::task[]
+
+repositories {
+    //mavenCentral()
+     jcenter()
+    maven { url "http://repo.spring.io/libs-snapshot" }
+}
+springBoot {
+    mainClass = 'com.sanju.wb.WbApplication'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+	compile('org.springframework.session:spring-session')
+	compile('org.springframework.boot:spring-boot-starter-validation')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compileOnly('org.projectlombok:lombok')
+	//providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
+	//    providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	compile 'javax.servlet:jstl'
+	    compile("org.springframework.boot:spring-boot-devtools")
+	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+    compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
+    // https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-core
+	compile group: 'org.mongodb', name: 'mongodb-driver-core', version: '3.4.2'
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+	compile group: 'org.springframework.security', name: 'spring-security-core', version: '3.1.0.RELEASE'
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-core
+	compile group: 'org.springframework.security', name: 'spring-security-core', version: '4.2.0.RELEASE'
+   	
+}
